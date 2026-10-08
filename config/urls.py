@@ -15,8 +15,39 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
+from django.urls import include, path
+
+from backend.accounts.history_views import (
+    ActivityListView,
+    NotificationListView,
+    NotificationReadAllView,
+    NotificationReadView,
+)
+from backend.accounts.dashboard_views import AdminDashboardView, UserDashboardView
+from backend.accounts.user_management_views import (
+    AdminUserActivationView,
+    AdminUserDetailView,
+    AdminUserListView,
+)
+from backend.tasks.views import EventTaskListCreateView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('api/auth/', include('backend.accounts.urls')),
+    path('api/notifications/', NotificationListView.as_view(), name='notification-list'),
+    path('api/notifications/read-all/', NotificationReadAllView.as_view(), name='notification-read-all'),
+    path('api/notifications/<int:pk>/read/', NotificationReadView.as_view(), name='notification-read'),
+    path('api/activity/', ActivityListView.as_view(), name='activity-list'),
+    path('api/dashboard/', UserDashboardView.as_view(), name='user-dashboard'),
+    path('api/admin/dashboard/', AdminDashboardView.as_view(), name='admin-dashboard'),
+    path('api/events/<int:event_id>/tasks/', EventTaskListCreateView.as_view(), name='event-tasks'),
+    path('api/events/', include('backend.events.urls')),
+    path('api/tasks/', include('backend.tasks.urls')),
+    path('api/users/', AdminUserListView.as_view(), name='admin-user-list'),
+    path('api/users/<int:pk>/', AdminUserDetailView.as_view(), name='admin-user-detail'),
+    path(
+        'api/users/<int:pk>/activation/',
+        AdminUserActivationView.as_view(),
+        name='admin-user-activation',
+    ),
 ]
